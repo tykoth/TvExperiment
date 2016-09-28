@@ -1,0 +1,214 @@
+<!doctype html>
+
+<html>
+
+    <head>
+        <title>HTML 5 Shooter</title>
+
+		<script type="text/javascript" src="easel.js"></script>
+
+		<script type="text/javascript">
+			var stage;
+			var canvas;
+			var g;
+			var stars;
+			
+			var BULLET_SPEED = 15;
+			var ship;
+			var shipImg;
+			var speed = 20;
+			var moveLeft = false;
+			var moveRight = false;
+			var moveUp = false;
+			var moveDown = false;
+			var bullets;
+			var bulletG;
+
+			function init() {
+				canvas = document.getElementById("canvas");
+				stage = new Stage(canvas);
+
+				bullets = new Array();
+				bulletG = new Graphics();
+				bulletG.setStrokeStyle(1);
+				bulletG.beginStroke(Graphics.getRGB(180,0,0));
+				bulletG.beginFill(Graphics.getRGB(200,200,0));
+				bulletG.drawCircle(0,0, 3);
+				
+				createStarField();  
+				
+				shipImg = new Image();
+				shipImg.onload = onShipLoaded;
+				shipImg.src  = "./ship.png";
+
+				Ticker.setFPS(60);
+				Ticker.addListener(window);
+				
+				window.onkeydown = onKeyDown;
+				window.onkeyup   = onKeyUp;
+				window.onclick = doFire;
+			}
+			
+			function onShipLoaded() {
+				ship = new Bitmap(shipImg);
+				ship.regX = ship.image.width * 0.5;
+				ship.regY = ship.image.height * 0.5;
+				ship.x    = 320;
+				ship.y 	  = 450;
+				
+				stage.addChild(ship);			
+			}
+			
+			function onKeyDown(e) {		
+				if(!e){ var e = window.event; }
+			
+				switch(e.keyCode) {
+					// left
+					case 37: 	moveLeft = true; moveRight = false;	break;					
+					// up
+					case 38:	moveUp = true; moveDown = false;	break;					
+					// right
+					case 39:	moveRight = true; moveLeft = false;	break;										
+					// down
+					case 40:	moveDown = true; moveUp = false;	break;
+				}
+			}
+		
+			function onKeyUp(e) {		
+				if(!e){ var e = window.event; }
+			
+				switch(e.keyCode) {
+					// left
+					case 37: 	moveLeft = false;	break;					
+					// up
+					case 38:	moveUp = false;		break;					
+					// right
+					case 39:	moveRight = false;	break;
+					// down
+					case 40:	moveDown = false;	break;
+					// Space
+					case 32:	doFire();			break;
+					// Space
+					case 13:	doFire();			break;					
+				}
+			}
+			
+			function doFire() {				
+				var bullet = new Shape(bulletG);
+				bullet.scaleY = 1.5;
+				bullet.x = ship.x;
+				bullet.y = ship.y - 30;
+				bullets.push(bullet);
+				
+				stage.addChild(bullet);
+			}
+		
+			function tick() {
+				updateStarField();
+				updateBullets();
+				checkMovement();
+				stage.update();
+			}
+
+			function updateStarField() {
+				return;
+				var curStar;
+				var limit = stars.length;
+				for(var i = 0; i < limit; ++i) {
+					curStar = stars[i];
+					curStar.y += 4;
+					if(curStar.y > 480)
+					{
+						curStar.x = randRange(10, 630);
+						curStar.y = -randRange(20, 450);
+					}
+				}
+			}
+			
+			function updateBullets() {
+				var bLimit = bullets.length - 1;
+				
+				for(var i = bLimit; i >= 0; --i) {
+					bullets[i].y -= BULLET_SPEED;
+					if(bullets[i].y < -3) {
+						stage.removeChild(bullets[i]);					
+						bullets.splice(i, 1)
+					}
+				}
+			}
+			
+			function checkMovement() {
+				if(moveLeft)
+				{
+					ship.x -= speed;
+					if(ship.x < 0)
+						ship.x = 640;
+				}
+				else if(moveRight)
+				{
+					ship.x += speed;
+					if(ship.x > 640)
+						ship.x = 0;
+				}
+					
+				if(moveUp)
+				{
+					if(ship.y - speed > 24)
+					{
+						ship.y -= speed;
+						BG_SPEED = 8;
+					}
+				}
+				else if(moveDown)
+				{
+					if(ship.y + speed < 460)
+					{
+						ship.y += speed;
+						BG_SPEED = 3;
+					}
+				}
+				else
+					BG_SPEED = 4;
+			}
+			
+			function createStarField() {
+				stars = new Array();
+
+				g = new Graphics();
+				g.setStrokeStyle(1);
+				g.beginStroke(Graphics.getRGB(255,255,255));
+				g.beginFill(Graphics.getRGB(255,255,255));
+				g.drawCircle(0,0, 1);
+
+				for(var i = 0; i < 100; ++i) {
+						var s = new Shape(g);
+					stars.push(s);
+					s.x = randRange(10, 630);
+					s.y = randRange(-250, 470);
+					s.scaleX = randRange(0.5, 2);
+						s.scaleY = s.scaleX;
+					s.alpha = Math.random() + 0.2;
+
+				   stage.addChild(s);
+				}
+			}
+
+			function randRange(min, max) {
+				return Math.floor(Math.random() * (max - min)) + min;
+			}
+		</script>
+		
+    </head>
+
+    <body onload="init();" style="margin:0;padding:0;background:white;text-align:center;">
+		<b>SHOOTER DIRETO DO CONTROLE REMOTO COM HTML 5</b>
+        <div id="wrapper" style="width:640px; height:100%; background-color:#000;margin:auto; ">
+
+	    <canvas id="canvas" width=640 height=480>
+	    </canvas>
+
+	</div>
+
+    </body>
+
+</html>
